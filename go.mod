@@ -1,4 +1,4 @@
-module elyria.io/aoc-helper
+module github.com/herrnan/aoc-helper
 
 go 1.17
 
