@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
 )
 
 var (
@@ -14,18 +16,22 @@ var (
 const (
 	sessionCookieName = "session"
 	baseURLString     = "https://adventofcode.com"
+	inputCacheDir     = ".aoc/input"
+
+	cacheFilePerm os.FileMode = 0755
 )
 
-func (h *Helper) GetInput(session string, day Day, year int) (string, error) {
-	if err := day.Validate(); err != nil {
-		return "", fmt.Errorf("invalid day: %w", err)
+func (h *helper) GetInput(session string) (string, error) {
+	cachedInput, err := h.getCachedInput()
+	if err == nil {
+		return cachedInput, nil
 	}
 
 	if session == "" {
 		return "", ErrNoSession
 	}
 
-	req, err := http.NewRequest(http.MethodGet, createGetInputURL(day, year), nil)
+	req, err := http.NewRequest(http.MethodGet, h.createGetInputURL(), nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
@@ -46,6 +52,8 @@ func (h *Helper) GetInput(session string, day Day, year int) (string, error) {
 		return "", fmt.Errorf("failed to read response: %w", err)
 	}
 
+	h.cacheInput(input)
+
 	return string(input), nil
 }
 
@@ -57,6 +65,44 @@ func createSessionCookie(session string) *http.Cookie {
 	}
 }
 
-func createGetInputURL(day Day, year int) string {
-	return fmt.Sprintf("%s/%d/day/%d/input", baseURLString, year, day)
+func (h *helper) createGetInputURL() string {
+	return fmt.Sprintf("%s/%d/day/%d/input", baseURLString, h.year, h.day)
+}
+
+func (h *helper) getCachedInput() (string, error) {
+	cachePath := h.createCachePath()
+
+	stat, err := h.fs.Stat(cachePath)
+	if err != nil {
+		return "", err
+	}
+
+	if stat.IsDir() {
+		return "", fmt.Errorf("cache file [%s] is a directory", cachePath)
+	}
+
+	input, err := h.fs.ReadFile(cachePath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(input), nil
+}
+
+func (h *helper) cacheInput(input []byte) {
+	cachePath := h.createCachePath()
+
+	err := h.fs.MkdirAll(path.Dir(cachePath), cacheFilePerm)
+	if err != nil {
+		return
+	}
+
+	err = h.fs.WriteFile(cachePath, input, cacheFilePerm)
+	if err != nil {
+		return
+	}
+}
+
+func (h *helper) createCachePath() string {
+	return fmt.Sprintf("%s/%s/%d/%02d", h.homeDir, inputCacheDir, h.year, h.day)
 }
