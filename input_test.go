@@ -14,7 +14,7 @@ import (
 func TestHelper_GetInput_ShouldFailWithoutSession(t *testing.T) {
 	fakeFS := afero.Afero{Fs: new(afero.MemMapFs)}
 
-	h := &helper{
+	h := &Helper{
 		client: http.DefaultClient,
 		day:    13,
 		year:   2021,
@@ -39,7 +39,7 @@ func TestHelper_GetInput_ShouldFailWithInvalidSession(t *testing.T) {
 	fakeFS.MkdirAll("home/test/.aoc", 0755)
 	fakeFS.WriteFile("/home/test/.aoc/session", []byte(invalidSession), 0755)
 
-	h := &helper{
+	h := &Helper{
 		client: http.DefaultClient,
 		day:    13,
 		year:   2021,
@@ -63,7 +63,7 @@ func TestHelper_GetInput_ShouldUseCachedInputWhenItExists(t *testing.T) {
 	fakeFS.MkdirAll("/home/test/.aoc/input/2021", 0755)
 	fakeFS.WriteFile("/home/test/.aoc/input/2021/13", []byte(expectedInput), 0755)
 
-	h := &helper{
+	h := &Helper{
 		client:  http.DefaultClient,
 		day:     13,
 		year:    2021,
@@ -93,7 +93,7 @@ func TestHelper_GetInput_ShouldDownloadInputWhenCacheDoesntExist(t *testing.T) {
 	fakeFS.MkdirAll("/home/test/.aoc", 0755)
 	fakeFS.WriteFile("/home/test/.aoc/session", []byte(session), 0755)
 
-	h := &helper{
+	h := &Helper{
 		client: http.DefaultClient,
 		day:    13,
 		year:   2021,
@@ -123,7 +123,7 @@ func TestHelper_GetInput_ShouldCacheDownloadedInput(t *testing.T) {
 	fakeFS.MkdirAll("home/test/.aoc", 0755)
 	fakeFS.WriteFile("/home/test/.aoc/session", []byte(session), 0755)
 
-	h := &helper{
+	h := &Helper{
 		client:  http.DefaultClient,
 		day:     13,
 		year:    2021,

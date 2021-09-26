@@ -23,7 +23,7 @@ const (
 )
 
 // GetSession retreives the input for the day and year specified in the helper.
-func (h *helper) GetInput() (string, error) {
+func (h *Helper) GetInput() (string, error) {
 	cachedInput, err := h.getCachedInput()
 	if err == nil {
 		return cachedInput, nil
@@ -39,7 +39,7 @@ func (h *helper) GetInput() (string, error) {
 	return string(input), nil
 }
 
-func (h *helper) downloadInput() ([]byte, error) {
+func (h *Helper) downloadInput() ([]byte, error) {
 	session, err := h.getSession()
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get session: %w", err)
@@ -48,7 +48,7 @@ func (h *helper) downloadInput() ([]byte, error) {
 	return h.downloadInputUsingSession(session)
 }
 
-func (h *helper) downloadInputUsingSession(session string) ([]byte, error) {
+func (h *Helper) downloadInputUsingSession(session string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, h.createGetInputURL(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -81,7 +81,7 @@ func createSessionCookie(session string) *http.Cookie {
 	}
 }
 
-func (h *helper) getSession() (string, error) {
+func (h *Helper) getSession() (string, error) {
 	sessionPath := h.sessionPath()
 
 	stat, err := h.fs.Stat(sessionPath)
@@ -102,15 +102,15 @@ func (h *helper) getSession() (string, error) {
 
 }
 
-func (h *helper) sessionPath() string {
+func (h *Helper) sessionPath() string {
 	return fmt.Sprintf("%s/%s", h.homeDir, sessionFile)
 }
 
-func (h *helper) createGetInputURL() string {
+func (h *Helper) createGetInputURL() string {
 	return fmt.Sprintf("%s/%d/day/%d/input", baseURLString, h.year, h.day)
 }
 
-func (h *helper) getCachedInput() (string, error) {
+func (h *Helper) getCachedInput() (string, error) {
 	cachePath := h.getCachePath()
 
 	stat, err := h.fs.Stat(cachePath)
@@ -130,7 +130,7 @@ func (h *helper) getCachedInput() (string, error) {
 	return string(input), nil
 }
 
-func (h *helper) cacheInput(input []byte) {
+func (h *Helper) cacheInput(input []byte) {
 	cachePath := h.getCachePath()
 
 	err := h.fs.MkdirAll(path.Dir(cachePath), cacheFilePerm)
@@ -144,6 +144,6 @@ func (h *helper) cacheInput(input []byte) {
 	}
 }
 
-func (h *helper) getCachePath() string {
+func (h *Helper) getCachePath() string {
 	return fmt.Sprintf("%s/%s/%d/%02d", h.homeDir, inputCacheDir, h.year, h.day)
 }
