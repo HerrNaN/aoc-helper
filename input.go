@@ -14,15 +14,16 @@ var (
 )
 
 const (
-	sessionCookieName = "session"
 	baseURLString     = "https://adventofcode.com"
-	aocDir            = ".aoc"
-	inputCacheDir     = "input"
-	sessionFile       = "session"
+	sessionCookieName = "session"
 
+	sessionFile   = ".aoc/session"
+
+	inputCacheDir = ".aoc/input"
 	cacheFilePerm os.FileMode = 0755
 )
 
+// GetSession retreives the input for the day and year specified in the helper.
 func (h *helper) GetInput() (string, error) {
 	cachedInput, err := h.getCachedInput()
 	if err == nil {
@@ -103,7 +104,7 @@ func (h *helper) getSession() (string, error) {
 }
 
 func (h *helper) sessionPath() string {
-	return fmt.Sprintf("%s/%s/%s", h.homeDir, aocDir, sessionFile)
+	return fmt.Sprintf("%s/%s", h.homeDir, sessionFile)
 }
 
 func (h *helper) createGetInputURL() string {
@@ -111,7 +112,7 @@ func (h *helper) createGetInputURL() string {
 }
 
 func (h *helper) getCachedInput() (string, error) {
-	cachePath := h.createCachePath()
+	cachePath := h.getCachePath()
 
 	stat, err := h.fs.Stat(cachePath)
 	if err != nil {
@@ -131,7 +132,7 @@ func (h *helper) getCachedInput() (string, error) {
 }
 
 func (h *helper) cacheInput(input []byte) {
-	cachePath := h.createCachePath()
+	cachePath := h.getCachePath()
 
 	err := h.fs.MkdirAll(path.Dir(cachePath), cacheFilePerm)
 	if err != nil {
@@ -144,6 +145,6 @@ func (h *helper) cacheInput(input []byte) {
 	}
 }
 
-func (h *helper) createCachePath() string {
-	return fmt.Sprintf("%s/%s/%s/%d/%02d", h.homeDir, aocDir, inputCacheDir, h.year, h.day)
+func (h *helper) getCachePath() string {
+	return fmt.Sprintf("%s/%s/%d/%02d", h.homeDir, inputCacheDir, h.year, h.day)
 }
