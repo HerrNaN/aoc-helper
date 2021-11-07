@@ -18,7 +18,7 @@ const (
 	baseURLString     = "https://adventofcode.com"
 	aocDir            = ".aoc"
 	inputCacheDir     = "input"
-	sessionPath       = "session"
+	sessionFile       = "session"
 
 	cacheFilePerm os.FileMode = 0755
 )
@@ -103,7 +103,7 @@ func (h *helper) getSession() (string, error) {
 }
 
 func (h *helper) sessionPath() string {
-	return fmt.Sprintf("%s/%s/session", h.homeDir, aocDir)
+	return fmt.Sprintf("%s/%s/%s", h.homeDir, aocDir, sessionFile)
 }
 
 func (h *helper) createGetInputURL() string {
