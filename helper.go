@@ -7,19 +7,18 @@ import (
 	"github.com/spf13/afero"
 )
 
+type Day int
+type Year int
+
 type helper struct {
 	client  *http.Client
 	day     Day
-	year    int
+	year    Year
 	fs      afero.Afero
 	homeDir string
 }
 
-func NewHelper(day Day, year int) (*helper, error) {
-	if err := day.Validate(); err != nil {
-		return nil, err
-	}
-
+func NewHelper(day Day, year Year) (*helper, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
