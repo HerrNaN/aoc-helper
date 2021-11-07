@@ -16,7 +16,9 @@ var (
 const (
 	sessionCookieName = "session"
 	baseURLString     = "https://adventofcode.com"
-	inputCacheDir     = ".aoc/input"
+	aocDir            = ".aoc"
+	inputCacheDir     = "input"
+	sessionPath       = "session"
 
 	cacheFilePerm os.FileMode = 0755
 )
@@ -65,6 +67,31 @@ func createSessionCookie(session string) *http.Cookie {
 	}
 }
 
+func (h *helper) getSession() (string, error) {
+	sessionPath := h.sessionPath()
+
+	stat, err := h.fs.Stat(sessionPath)
+	if err != nil {
+		return "", fmt.Errorf("couldn't get file info for '%s': %w", sessionPath, err)
+	}
+
+	if stat.IsDir() {
+		return "", fmt.Errorf("session file '%s' is a directory", sessionPath)
+	}
+
+	session, err := h.fs.ReadFile(sessionPath)
+	if err != nil {
+		return "", fmt.Errorf("couldn't read session file '%s': %w", sessionPath, err)
+	}
+
+	return string(session), nil
+
+}
+
+func (h *helper) sessionPath() string {
+	return fmt.Sprintf("%s/%s/session", h.homeDir, aocDir)
+}
+
 func (h *helper) createGetInputURL() string {
 	return fmt.Sprintf("%s/%d/day/%d/input", baseURLString, h.year, h.day)
 }
@@ -104,5 +131,5 @@ func (h *helper) cacheInput(input []byte) {
 }
 
 func (h *helper) createCachePath() string {
-	return fmt.Sprintf("%s/%s/%d/%02d", h.homeDir, inputCacheDir, h.year, h.day)
+	return fmt.Sprintf("%s/%s/%s/%d/%02d", h.homeDir, aocDir, inputCacheDir, h.year, h.day)
 }
