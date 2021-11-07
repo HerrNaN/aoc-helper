@@ -29,35 +29,48 @@ func (h *helper) GetInput() (string, error) {
 		return cachedInput, nil
 	}
 
-	session, err := h.getSession()
+	input, err := h.downloadInput()
 	if err != nil {
-		return "", fmt.Errorf("couldn't get session: %w", err)
+		return "", fmt.Errorf("couldn't download input: %w", err)
 	}
 
+	h.cacheInput(input)
+
+	return string(input), nil
+}
+
+func (h *helper) downloadInput() ([]byte, error) {
+	session, err := h.getSession()
+	if err != nil {
+		return nil, fmt.Errorf("couldn't get session: %w", err)
+	}
+
+	return h.downloadInputUsingSession(session)
+}
+
+func (h *helper) downloadInputUsingSession(session string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, h.createGetInputURL(), nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.AddCookie(createSessionCookie(session))
 
 	response, err := h.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to perform reqest: %w", err)
+		return nil, fmt.Errorf("failed to perform reqest: %w", err)
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return "", ErrNon200Response
+		return nil, ErrNon200Response
 	}
 
 	input, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
+		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	h.cacheInput(input)
-
-	return string(input), nil
+	return input, nil
 }
 
 func createSessionCookie(session string) *http.Cookie {
