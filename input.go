@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrNoSession = errors.New("no session provided")
+	ErrNon200Response = errors.New("server responded with non-200 status code")
 )
 
 const (
@@ -23,14 +23,15 @@ const (
 	cacheFilePerm os.FileMode = 0755
 )
 
-func (h *helper) GetInput(session string) (string, error) {
+func (h *helper) GetInput() (string, error) {
 	cachedInput, err := h.getCachedInput()
 	if err == nil {
 		return cachedInput, nil
 	}
 
-	if session == "" {
-		return "", ErrNoSession
+	session, err := h.getSession()
+	if err != nil {
+		return "", fmt.Errorf("couldn't get session: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, h.createGetInputURL(), nil)
@@ -46,7 +47,7 @@ func (h *helper) GetInput(session string) (string, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return "", errors.New("server responded with non-200 status code")
+		return "", ErrNon200Response
 	}
 
 	input, err := ioutil.ReadAll(response.Body)

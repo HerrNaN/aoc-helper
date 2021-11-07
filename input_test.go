@@ -11,7 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestHelper_GetInput_ShouldFailWithErrNoSessionWithoutSession(t *testing.T) {
+func TestHelper_GetInput_ShouldFailWithoutSession(t *testing.T) {
 	fakeFS := afero.Afero{Fs: new(afero.MemMapFs)}
 
 	h := &helper{
@@ -21,9 +21,8 @@ func TestHelper_GetInput_ShouldFailWithErrNoSessionWithoutSession(t *testing.T) 
 		fs:     fakeFS,
 	}
 
-	_, err := h.GetInput("")
+	_, err := h.GetInput()
 	require.Error(t, err)
-	require.ErrorIs(t, err, ErrNoSession)
 }
 
 func TestHelper_GetInput_ShouldFailWithInvalidSession(t *testing.T) {
@@ -37,6 +36,8 @@ func TestHelper_GetInput_ShouldFailWithInvalidSession(t *testing.T) {
 		Reply(500)
 
 	fakeFS := afero.Afero{Fs: new(afero.MemMapFs)}
+	fakeFS.MkdirAll("home/test/.aoc", 0755)
+	fakeFS.WriteFile("/home/test/.aoc/session", []byte(invalidSession), 0755)
 
 	h := &helper{
 		client: http.DefaultClient,
@@ -45,7 +46,7 @@ func TestHelper_GetInput_ShouldFailWithInvalidSession(t *testing.T) {
 		fs:     fakeFS,
 	}
 
-	_, err := h.GetInput(invalidSession)
+	_, err := h.GetInput()
 	require.Error(t, err)
 }
 
@@ -70,7 +71,7 @@ func TestHelper_GetInput_ShouldUseCachedInputWhenItExists(t *testing.T) {
 		homeDir: "/home/test",
 	}
 
-	actualInput, err := h.GetInput("")
+	actualInput, err := h.GetInput()
 
 	require.NoError(t, err)
 	require.Equal(t, expectedInput, actualInput)
@@ -89,6 +90,8 @@ func TestHelper_GetInput_ShouldDownloadInputWhenCacheDoesntExist(t *testing.T) {
 		JSON(expectedInput)
 
 	fakeFS := afero.Afero{Fs: new(afero.MemMapFs)}
+	fakeFS.MkdirAll("home/test/.aoc", 0755)
+	fakeFS.WriteFile("/home/test/.aoc/session", []byte(session), 0755)
 
 	h := &helper{
 		client: http.DefaultClient,
@@ -97,7 +100,7 @@ func TestHelper_GetInput_ShouldDownloadInputWhenCacheDoesntExist(t *testing.T) {
 		fs:     fakeFS,
 	}
 
-	actualInput, err := h.GetInput(session)
+	actualInput, err := h.GetInput()
 
 	require.NoError(t, err)
 	require.Equal(t, expectedInput, actualInput)
@@ -116,6 +119,8 @@ func TestHelper_GetInput_ShouldCacheDownloadedInput(t *testing.T) {
 		JSON(expectedInput)
 
 	fakeFS := afero.Afero{Fs: new(afero.MemMapFs)}
+	fakeFS.MkdirAll("home/test/.aoc", 0755)
+	fakeFS.WriteFile("/home/test/.aoc/session", []byte(session), 0755)
 
 	h := &helper{
 		client:  http.DefaultClient,
@@ -125,7 +130,7 @@ func TestHelper_GetInput_ShouldCacheDownloadedInput(t *testing.T) {
 		homeDir: "/home/test",
 	}
 
-	_, err := h.GetInput(session)
+	_, err := h.GetInput()
 	require.NoError(t, err)
 
 	cacheFile := h.homeDir + "/.aoc/input/2021/13"
