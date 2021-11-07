@@ -90,7 +90,7 @@ func TestHelper_GetInput_ShouldDownloadInputWhenCacheDoesntExist(t *testing.T) {
 		JSON(expectedInput)
 
 	fakeFS := afero.Afero{Fs: new(afero.MemMapFs)}
-	fakeFS.MkdirAll("home/test/.aoc", 0755)
+	fakeFS.MkdirAll("/home/test/.aoc", 0755)
 	fakeFS.WriteFile("/home/test/.aoc/session", []byte(session), 0755)
 
 	h := &helper{
@@ -98,6 +98,7 @@ func TestHelper_GetInput_ShouldDownloadInputWhenCacheDoesntExist(t *testing.T) {
 		day:    13,
 		year:   2021,
 		fs:     fakeFS,
+		homeDir: "/home/test",
 	}
 
 	actualInput, err := h.GetInput()
