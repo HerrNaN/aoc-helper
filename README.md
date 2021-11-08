@@ -4,3 +4,6 @@
 
 # :christmas_tree: AoC Helper
 Helper lib for Advent of Code in golang
+
+`go get https://github.com/herrnan/aoc-helper`
+
