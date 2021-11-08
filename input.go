@@ -17,9 +17,8 @@ const (
 	baseURLString     = "https://adventofcode.com"
 	sessionCookieName = "session"
 
-	sessionFile   = ".aoc/session"
-
-	inputCacheDir = ".aoc/input"
+	sessionFile               = ".aoc/session"
+	inputCacheDir             = ".aoc/input"
 	cacheFilePerm os.FileMode = 0755
 )
 
