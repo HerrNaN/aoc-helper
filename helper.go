@@ -10,7 +10,7 @@ import (
 type Day int
 type Year int
 
-type helper struct {
+type Helper struct {
 	client  *http.Client
 	day     Day
 	year    Year
@@ -18,13 +18,13 @@ type helper struct {
 	homeDir string
 }
 
-func NewHelper(day Day, year Year) (*helper, error) {
+func NewHelper(day Day, year Year) (*Helper, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
 
-	return &helper{
+	return &Helper{
 		day:    day,
 		year:   year,
 		client: http.DefaultClient,
